@@ -1,4 +1,4 @@
-name: Android CI (Mobile auto-detect)
+name: Android CI (Mobile arm64-v8a)
 
 on:
   workflow_dispatch:
@@ -32,25 +32,15 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: List all assemble tasks
+      - name: List all assemble tasks (for debugging)
         run: ./gradlew tasks | grep assemble
 
-      - name: Find and run mobile debug assemble task
-        id: find_task
-        run: |
-          TASK=$(./gradlew tasks --all | grep -o 'assemble[Mm]obile[^[:space:]]*Debug' | head -1)
-          if [ -z "$TASK" ]; then
-            echo "❌ Could not find any mobile debug assemble task. Available tasks:"
-            ./gradlew tasks | grep assemble
-            exit 1
-          fi
-          echo "✅ Found task: $TASK"
-          echo "task_name=$TASK" >> $GITHUB_OUTPUT
-          ./gradlew $TASK
+      - name: Build mobile arm64-v8a debug APK
+        run: ./gradlew assembleMobileArm64_v8aDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: mobile-debug-apk
-          path: app/build/outputs/apk/**/mobile/**/debug/*.apk
+          name: mobile-arm64-v8a-debug-apk
+          path: app/build/outputs/apk/mobile/arm64-v8a/debug/app-mobile-arm64-v8a-debug.apk
           if-no-files-found: error
