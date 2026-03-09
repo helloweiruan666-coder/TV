@@ -1,4 +1,4 @@
-name: Android CI (Mobile arm64-v8a)
+name: Android CI (Mobile arm64-v8a with fix)
 
 on:
   workflow_dispatch:
@@ -34,6 +34,16 @@ jobs:
 
       - name: List all assemble tasks (for debugging)
         run: ./gradlew tasks | grep assemble
+
+      # 临时修复 ExoUtil.java 中的编译错误
+      - name: Apply hotfix for MimeTypes.APPLICATION_OCTET_STREAM
+        run: |
+          if [ -f app/src/main/java/com/fongmi/android/tv/player/exo/ExoUtil.java ]; then
+            sed -i 's/MimeTypes\.APPLICATION_OCTET_STREAM/"application\/octet-stream"/g' app/src/main/java/com/fongmi/android/tv/player/exo/ExoUtil.java
+            echo "✅ Fixed ExoUtil.java"
+          else
+            echo "⚠️ ExoUtil.java not found, skipping fix"
+          fi
 
       - name: Build mobile arm64-v8a debug APK
         run: ./gradlew assembleMobileArm64_v8aDebug
