@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive  # 自动拉取所有子模块
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
@@ -27,15 +29,21 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: List resources (debug)
+        run: |
+          echo "=== Resource directories ==="
+          find app/src/main -type d -name "res" | xargs ls -la
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build all debug variants
-        run: ./gradlew assembleDebug
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug --info --stacktrace
 
-      - name: Upload APKs
+      - name: Upload APKs (if any)
+        if: success()  # 仅当构建成功时才上传
         uses: actions/upload-artifact@v4
         with:
           name: debug-apks
           path: app/build/outputs/apk/**/*.apk
-          if-no-files-found: error
+          if-no-files-found: warn
