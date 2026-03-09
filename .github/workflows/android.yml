@@ -32,7 +32,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: List all assemble tasks (for debugging)
+      - name: List all assemble tasks (debug)
         run: ./gradlew tasks | grep assemble
 
       # 临时修复 ExoUtil.java 中的编译错误
@@ -48,9 +48,14 @@ jobs:
       - name: Build mobile arm64-v8a debug APK
         run: ./gradlew assembleMobileArm64_v8aDebug
 
+      # 查找实际生成的 APK 文件（调试用）
+      - name: Find generated APKs
+        run: find app/build/outputs/apk -name "*.apk" || echo "No APK found"
+
+      # 上传所有找到的 APK（使用通配符）
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: mobile-arm64-v8a-debug-apk
-          path: app/build/outputs/apk/mobile/arm64-v8a/debug/app-mobile-arm64-v8a-debug.apk
+          name: mobile-debug-apk
+          path: app/build/outputs/apk/**/*.apk
           if-no-files-found: error
